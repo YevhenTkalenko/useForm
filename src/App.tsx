@@ -1,36 +1,72 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { SubmitHandler, useForm } from "react-hook-form";
+import "./App.scss";
+import { useEffect } from "react";
+
+interface IForm {
+  email: string;
+  message: string;
+}
 
 function App() {
-  const [count, setCount] = useState(0);
+  const {
+    register,
+    handleSubmit,
+    formState,
+    reset,
+    getValues,
+    watch,
+    setValue,
+  } = useForm<IForm>({
+    mode: "onChange",
+  });
+
+  reset({
+    email: '"test@test.com"',
+    message: "test message",
+  });
+
+  const onSubmit: SubmitHandler<IForm> = (data) => {
+    console.log(getValues("email"));
+    reset();
+  };
+
+  const errorInput = formState.errors.email;
+  const errorTextArea = formState.errors.message;
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
       <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <button onClick={() => setCount((count) => count - 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <input
+          type="text"
+          placeholder="Enter your email"
+          {...register("email", {
+            required: "This field is required",
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+              message: "Invalid email address",
+            },
+          })}
+        />
+        {errorInput && <div style={{ color: "red" }}>{errorInput.message}</div>}
+        <div style={{ color: "red" }}></div>
+        <textarea
+          placeholder="Enter yout message"
+          {...register("message", {
+            required: "This field is required",
+            minLength: {
+              value: 2,
+              message: "Message must be at least 2 characters",
+            },
+          })}
+        ></textarea>
+        {errorTextArea && (
+          <div style={{ color: "red" }}>{errorTextArea?.message}</div>
+        )}
+        <button type="submit">Send your message</button>
+      </form>
     </>
   );
 }
